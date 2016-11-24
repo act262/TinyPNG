@@ -1,0 +1,39 @@
+<idea-plugin version="2">
+    <id>io.microact.plugin.tinypng</id>
+    <name>TinyPNG</name>
+    <version>1.0</version>
+    <vendor email="act262@gmail.com" url="https://github.com/act262">act262</vendor>
+
+    <description><![CDATA[
+      TinyPNG for IntelliJ IDEA.<br>
+      <em>自动压缩png和jpg图片</em>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      beta test
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="141.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+    <depends>org.jetbrains.android</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="RunTiny" class="io.microact.tinypng.TinyAction" text="TinyAction">
+            <add-to-group group-id="AndroidToolsGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt T"/>
+        </action>
+    </actions>
+
+</idea-plugin>
