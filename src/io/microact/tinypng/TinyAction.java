@@ -22,50 +22,18 @@ import java.util.Properties;
  */
 public class TinyAction extends AnAction {
 
-    private static final String PROFILE = ".profile.ini";
-    private static final String KEY_API_KEY = "apiKey";
+    private static final String PROFILE = ".local.properties";
+    private static final String KEY_API_KEY = "TinyApiKey";
+
+    private String mApiKey;
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getData(PlatformDataKeys.PROJECT);
+        assert project != null;
         String basePath = project.getBasePath();
 
-        // 校验API key是否有效
-        String apiKey = null;
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        try {
-            File profile = new File(basePath, PROFILE);
-            if (!profile.exists()) {
-                profile.createNewFile();
-            }
-            inputStream = new BufferedInputStream(new FileInputStream(profile));
-            outputStream = new FileOutputStream(profile);
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            apiKey = properties.getProperty(KEY_API_KEY);
-
-            if (apiKey == null || apiKey.isEmpty()) {
-                apiKey = Messages.showInputDialog(project, "还没有API Key?", "请输入你的key", Messages.getQuestionIcon());
-                try {
-                    initClient(apiKey);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                    Messages.showInfoMessage(e1.getMessage(), "");
-                    return;
-                }
-                // save property
-                properties.setProperty(KEY_API_KEY, apiKey);
-                properties.store(outputStream, "TinyPNG API Key");
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            Messages.showErrorDialog("发生错误了", "");
-            return;
-        } finally {
-            StreamUtil.closeStream(inputStream);
-            StreamUtil.closeStream(outputStream);
-        }
+        readProfile(basePath);
 
         File baseDir = new File(basePath, "app/src/main/res/");
         File[] dirFiles = getMatchesDir(baseDir);
@@ -84,9 +52,68 @@ public class TinyAction extends AnAction {
         asyncTask(new TinyRunnable(fileList));
     }
 
+    private void readProfile(String basePath) {
+        // 校验API key是否有效
+        readAction(new Runnable() {
+
+            @Override
+            public void run() {
+                InputStream inputStream = null;
+                try {
+                    File profile = new File(basePath, PROFILE);
+                    if (!profile.exists()) {
+                        profile.createNewFile();
+                    }
+                    inputStream = new FileInputStream(profile);
+                    Properties properties = new Properties();
+                    properties.load(inputStream);
+                    mApiKey = properties.getProperty(KEY_API_KEY);
+
+                    if (mApiKey == null || mApiKey.isEmpty()) {
+                        mApiKey = Messages.showInputDialog("还没有API Key?", "请输入你的key", Messages.getQuestionIcon());
+                        try {
+                            initClient(mApiKey);
+                        } catch (Exception e1) {
+                            e1.printStackTrace();
+                            Messages.showInfoMessage(e1.getMessage(), "");
+                            return;
+                        }
+                        writeProfile(profile);
+                    }
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    Messages.showErrorDialog("发生错误了", "");
+                    return;
+                } finally {
+                    StreamUtil.closeStream(inputStream);
+                }
+            }
+        });
+    }
+
+    private void writeProfile(File profile) {
+        writeAction(new Runnable() {
+            @Override
+            public void run() {
+                OutputStream outputStream = null;
+                // save property
+                try {
+                    Properties properties = new Properties();
+                    outputStream = new FileOutputStream(profile);
+                    properties.setProperty(KEY_API_KEY, mApiKey);
+                    properties.store(outputStream, null);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                } finally {
+                    StreamUtil.closeStream(outputStream);
+                }
+            }
+        });
+    }
+
     private void initClient(String key) throws Exception {
         Tinify.setKey(key);
-        Tinify.setAppIdentifier("TinyPNG4AndroidStudio");
+        Tinify.setAppIdentifier("TinyPNG-IDEA");
 
         boolean validate = Tinify.validate();
         // API KEY 无效！

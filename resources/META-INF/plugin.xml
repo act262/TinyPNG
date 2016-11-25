@@ -30,9 +30,9 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="RunTiny" class="io.microact.tinypng.TinyAction" text="TinyAction">
+        <action id="RunTiny" class="io.microact.tinypng.TinyAction" text="TinyPNG">
             <add-to-group group-id="AndroidToolsGroup" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt T"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl T"/>
         </action>
     </actions>
 
